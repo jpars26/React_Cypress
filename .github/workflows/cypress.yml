@@ -10,71 +10,47 @@ on:
 
 jobs:
 
- cypress-run:
+  build:
+    runs-on: ubuntu-latest
 
-   runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-   strategy:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-     fail-fast: false
+      - name: Install dependencies
+        run: npm install
+        working-directory: server
 
-   steps:
+      - name: Start Web App FrontEnd
+        run: |
+          npm install
+          npm start &
+        working-directory: .
 
-     - name: Checkout
+      - name: Install Cypress Dependencies
+        run: npm ci
+        working-directory: .
 
-       uses: actions/checkout@v4
+      - name: Start Server BackEnd
+        run: |
+          cd server/api-bytebank
+          npm install
+          npm run start-api &
+          until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
+            echo "Waiting for server to start..."
+            sleep 1
+          done
+          echo "Server is running successfully."
+        working-directory: server/api-bytebank
 
-     - name: Checkout
-
-       uses: actions/checkout@v4
-
-       with:
-
-         path: server/api-bytebank
-
-     - name: Start Server BackEnd
-
-       run: |
-
-         cd server/api-bytebank
-
-         npm install
-
-         npm run start-api &
-
-         until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)" == "200" ]; do
-
-           echo "Waiting for server to start..."
-
-           sleep 1
-
-         done
-
-         echo "Server is running successfully."
-
-       working-directory: server/api-bytebank
-
-     - name: Start Web App FrontEnd
-
-       run: |
-
-         npm install
-
-         npm start &
-
-     - name: Install Cypress Dependencies         
-       run: |
-
-        npm ci
-
-     - name: Run Cypress Tests
-
-       uses: cypress-io/github-action@v6
-
-       with:
-
-         spec: cypress/e2e/
-
-         wait-on: 'http://localhost:3000,http://localhost:8080'
-
-         record: true
+      - name: Run Cypress Tests
+        uses: cypress-io/github-action@v6
+        with:
+          spec: cypress/e2e/
+          wait-on: 'http://localhost:3000,http://localhost:8000'
+          record: true
