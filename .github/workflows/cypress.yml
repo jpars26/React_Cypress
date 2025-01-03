@@ -31,10 +31,7 @@ jobs:
           npm start &
         working-directory: .
 
-      - name: Install Cypress Dependencies
-        run: npm ci --legacy-peer-deps
-        working-directory: .
-
+     
       - name: Start Server BackEnd
         run: |
           if [ -d "server/api-bytebank" ]; then
