@@ -34,15 +34,12 @@ jobs:
           npm start &
         working-directory: .
 
-      - name: Install Cypress Dependencies
-        run: npm ci --legacy-peer-deps
-        working-directory: .
 
       - name: Start Server BackEnd
         run: |
           if [ -d "server/api-bytebank" ]; then
             cd server/api-bytebank
-            npm ci --legacy-peer-deps
+            npm ci --force
             npm run start-api &
             until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
               echo "Waiting for server to start..."
