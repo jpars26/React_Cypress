@@ -16,25 +16,27 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Clean node_modules
+        run: rm -rf node_modules
+
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
         working-directory: .
 
       - name: Start Web App FrontEnd
         run: |
-          npm install
           npm start &
         working-directory: .
 
       - name: Install Cypress Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         working-directory: .
 
       - name: Start Server BackEnd
         run: |
           if [ -d "server/api-bytebank" ]; then
             cd server/api-bytebank
-            npm install
+            npm install --legacy-peer-deps
             npm run start-api &
             until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
               echo "Waiting for server to start..."
