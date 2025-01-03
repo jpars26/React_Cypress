@@ -30,7 +30,7 @@ jobs:
 
        with:
 
-         path: server
+         path: server/api-bytebank
 
      - name: Start Server BackEnd
 
@@ -52,7 +52,7 @@ jobs:
 
          echo "Server is running successfully."
 
-       working-directory: server
+       working-directory: server/api-bytebank
 
      - name: Start Web App FrontEnd
 
