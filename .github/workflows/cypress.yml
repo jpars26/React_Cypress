@@ -1,12 +1,6 @@
 name: Cypress Tests
 
-on:
-
- push:
-
-   branches:
-
-     - main
+on: [push, pull_request]
 
 jobs:
 
@@ -24,7 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: server
+        working-directory: .
 
       - name: Start Web App FrontEnd
         run: |
@@ -38,15 +32,20 @@ jobs:
 
       - name: Start Server BackEnd
         run: |
-          cd server/api-bytebank
-          npm install
-          npm run start-api &
-          until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
-            echo "Waiting for server to start..."
-            sleep 1
-          done
-          echo "Server is running successfully."
-        working-directory: server/api-bytebank
+          if [ -d "server/api-bytebank" ]; then
+            cd server/api-bytebank
+            npm install
+            npm run start-api &
+            until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
+              echo "Waiting for server to start..."
+              sleep 1
+            done
+            echo "Server is running successfully."
+          else
+            echo "Directory server/api-bytebank does not exist."
+            exit 1
+          fi
+        working-directory: .
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
