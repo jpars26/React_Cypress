@@ -29,7 +29,7 @@ jobs:
         working-directory: .
 
       - name: Install Cypress Dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci 
         working-directory: .
 
       - name: Start Server BackEnd
