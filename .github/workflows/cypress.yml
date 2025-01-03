@@ -14,38 +14,27 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'
-
-      - name: Clean node_modules and cache
-        run: |
-          rm -rf node_modules
-          rm -rf ~/.npm
-          rm -rf ~/.cache
-
-      - name: Clean npm cache
-        run: npm cache clean --force
-
-      - name: Install latest eslint
-        run: npm install eslint@latest --save-dev
+          node-version: '14'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm install
         working-directory: .
 
       - name: Start Web App FrontEnd
         run: |
+          npm install
           npm start &
         working-directory: .
 
       - name: Install Cypress Dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci
         working-directory: .
 
       - name: Start Server BackEnd
         run: |
           if [ -d "server/api-bytebank" ]; then
             cd server/api-bytebank
-            npm ci --legacy-peer-deps
+            npm install
             npm run start-api &
             until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
               echo "Waiting for server to start..."
@@ -63,5 +52,4 @@ jobs:
         with:
           spec: cypress/e2e/
           wait-on: 'http://localhost:3000,http://localhost:8000'
-          wait-on-timeout: 120
           record: true
