@@ -1,56 +1,29 @@
-name: Cypress Tests
+name: Cypress Test
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [16.x]
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
-        run: npm install
-        working-directory: .
+      - run: npm ci
 
-      - name: Start Web App FrontEnd
-        run: |
-          npm install
-          npm start &
-        working-directory: .
+      - name: Testes
+        run: npm test
 
-      - name: Install Cypress Dependencies
-        run: npm ci
-        working-directory: .
-
-      - name: Start Server BackEnd
-        run: |
-          if [ -d "server/api-bytebank" ]; then
-            cd server/api-bytebank
-            npm install
-            npm run start-api &
-            until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)" == "200" ]; do
-              echo "Waiting for server to start..."
-              sleep 1
-            done
-            echo "Server is running successfully."
-          else
-            echo "Directory server/api-bytebank does not exist."
-            exit 1
-          fi
-        working-directory: .
-
-      - name: Run Cypress Tests
-        uses: cypress-io/github-action@v6
-        with:
-          spec: cypress/e2e/
-          wait-on: 'http://localhost:3000,http://localhost:8000'
-          wait-on-timeout: 120
-          record: true
+      - name: Monitor de cobertura de teste
+        run: npm run test:coverage
